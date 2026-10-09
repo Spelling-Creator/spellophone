@@ -1,0 +1,90 @@
+{
+  "name": "@spelling-creator/spellophone",
+  "version": "0.1.0",
+  "description": "espeak-ng text-to-speech and phoneme transcription for Node.js and browsers, compiled to WebAssembly.",
+  "keywords": [
+    "espeak",
+    "espeak-ng",
+    "ipa",
+    "phonemes",
+    "speech-synthesis",
+    "text-to-speech",
+    "tts",
+    "wasm",
+    "webassembly"
+  ],
+  "homepage": "https://github.com/Spelling-Creator/spellophone#readme",
+  "bugs": {
+    "url": "https://github.com/Spelling-Creator/spellophone/issues"
+  },
+  "license": "GPL-3.0-or-later",
+  "author": "Spelling Creator",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Spelling-Creator/spellophone.git",
+    "directory": "packages/spellophone"
+  },
+  "files": [
+    "dist",
+    "wasm",
+    "espeak-ng-data",
+    "LICENSE",
+    "README.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "node": {
+        "types": "./dist/node.d.ts",
+        "default": "./dist/node.js"
+      },
+      "default": {
+        "types": "./dist/browser.d.ts",
+        "default": "./dist/browser.js"
+      }
+    },
+    "./node": {
+      "types": "./dist/node.d.ts",
+      "default": "./dist/node.js"
+    },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "default": "./dist/browser.js"
+    },
+    "./core": {
+      "types": "./dist/core.d.ts",
+      "default": "./dist/core.js"
+    },
+    "./wasm/espeak-ng.js": {
+      "types": "./wasm/espeak-ng.d.ts",
+      "default": "./wasm/espeak-ng.js"
+    },
+    "./wasm/espeak-ng.wasm": "./wasm/espeak-ng.wasm",
+    "./espeak-ng-data/*": "./espeak-ng-data/*",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "build": "pnpm build:data && pnpm build:wasm && pnpm build:ts",
+    "build:data": "node scripts/build-data.ts",
+    "build:wasm": "node scripts/build-wasm.ts",
+    "build:ts": "tsdown",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepack": "pnpm build:ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "publint": "^0.3.17",
+    "tsdown": "^0.23.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

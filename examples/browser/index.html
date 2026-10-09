@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>spellophone browser example</title>
+    <link rel="icon" href="data:," />
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+      }
+      body {
+        max-width: 40rem;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        line-height: 1.5;
+      }
+      textarea,
+      select,
+      button,
+      input {
+        font: inherit;
+      }
+      textarea {
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+        margin: 0.75rem 0;
+      }
+      output {
+        display: block;
+        white-space: pre-wrap;
+        font-family: ui-monospace, monospace;
+        padding: 0.5rem;
+        border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+        border-radius: 0.25rem;
+        min-height: 1.5rem;
+      }
+      .status {
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>spellophone</h1>
+    <p>
+      espeak-ng running as WebAssembly in your browser. Nothing leaves the page.
+    </p>
+
+    <label>
+      Text
+      <textarea id="text" rows="3">
+Hello from spellophone, speaking in your browser.</textarea>
+    </label>
+
+    <div class="row">
+      <label
+        >Voice
+        <select id="voice" disabled></select
+      ></label>
+      <label
+        >Rate <input id="rate" type="range" min="80" max="450" value="175"
+      /></label>
+      <label
+        >Pitch <input id="pitch" type="range" min="0" max="99" value="50"
+      /></label>
+    </div>
+
+    <div class="row">
+      <button id="speak" disabled>Speak</button>
+      <button id="download" disabled>Download WAV</button>
+      <span id="status" class="status">Loading espeak-ng...</span>
+    </div>
+
+    <h2>Phonemes</h2>
+    <output id="ipa" aria-live="polite"></output>
+
+    <h2>Word timings</h2>
+    <output id="events"></output>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

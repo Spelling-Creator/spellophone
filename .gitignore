@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Fetched espeak-ng sources (pnpm fetch:espeak). The artifacts built from them
+# (packages/spellophone/wasm and espeak-ng-data) ARE checked in: jsDelivr
+# serves them straight from the repository at a release tag, and contributors
+# to the TypeScript side do not need the emsdk that way. See
+# apps/docs/docs/project/building.md.
+vendor/espeak-ng/
+
+# VitePress
+apps/docs/doc_build/
+apps/docs/docs/.vitepress/cache/
+apps/docs/docs/.vitepress/dist/
+
+# Output of the Node example
+examples/node/*.wav
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+
+# Playwright MCP/CLI screenshots and snapshots (browser verification artifacts)
+.playwright-mcp/
+.playwright-cli/

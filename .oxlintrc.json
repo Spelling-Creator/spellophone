@@ -1,0 +1,84 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/node_modules/**",
+    "vendor/**",
+    "build/**",
+    "packages/spellophone/wasm/**",
+    "apps/docs/doc_build/**",
+    "apps/docs/docs/.vitepress/cache/**"
+  ],
+
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "import"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+
+  "env": {
+    "builtin": true,
+    "es2024": true
+  },
+
+  "rules": {
+    "eslint/no-undef": "error",
+    "eslint/no-unused-vars": [
+      "error",
+      {
+        "caughtErrors": "none",
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "typescript/consistent-type-imports": "error",
+    "import/no-cycle": "error",
+    // Every function Emscripten exports from the wasm is named _like_this.
+    "eslint/no-underscore-dangle": "off"
+  },
+
+  "globals": {
+    // Injected by tsdown and vitest from package.json (see src/env.d.ts).
+    "__SPELLOPHONE_VERSION__": "readonly"
+  },
+
+  "overrides": [
+    // The library core is runtime-neutral: it must work in Node, browsers and
+    // workers alike, so it only gets the Web-standard globals a worker has.
+    {
+      "files": ["packages/spellophone/src/**/*.ts"],
+      "env": { "worker": true }
+    },
+
+    // ...except the Node entry point, which is allowed to touch the file
+    // system, and the tests, which only ever run under vitest on Node.
+    {
+      "files": [
+        "packages/spellophone/src/node.ts",
+        "packages/spellophone/src/**/*.test.ts"
+      ],
+      "env": { "worker": true, "node": true }
+    },
+
+    // Build tooling: plain Node scripts, never bundled or shipped.
+    {
+      "files": [
+        "scripts/**/*.ts",
+        "packages/spellophone/scripts/**/*.ts",
+        "**/tsdown.config.ts",
+        "**/vite.config.ts",
+        "**/vitest.config.ts",
+        "apps/docs/docs/.vitepress/**/*.ts",
+        "examples/node/**/*.ts"
+      ],
+      "env": { "node": true }
+    },
+
+    // Browser example: runs in a page bundled by Vite.
+    {
+      "files": ["examples/browser/src/**/*.ts"],
+      "env": { "browser": true }
+    }
+  ]
+}
