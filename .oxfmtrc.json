@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+
+  "printWidth": 80,
+
+  "ignorePatterns": [
+    "pnpm-lock.yaml",
+    "LICENSE",
+
+    // Fetched upstream sources and everything built from them.
+    "vendor/**",
+    "build/**",
+    "packages/spellophone/wasm/**",
+    "packages/spellophone/espeak-ng-data/**",
+
+    "**/dist/**",
+    "apps/docs/doc_build/**",
+    "apps/docs/docs/.vitepress/cache/**"
+  ]
+}

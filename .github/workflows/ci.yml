@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: "ci-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  # Lint, type-check, test and build everything that only needs Node.js. The
+  # committed wasm and data are used as they are.
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [24, 26]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 12.4.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint and format check
+        run: pnpm lint
+
+      - name: Bundle the library
+        run: pnpm --filter @spelling-creator/spellophone build:ts
+
+      - name: Type-check
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build the browser example
+        run: pnpm --filter @spellophone/example-browser build
+
+      - name: Run the Node example
+        run: pnpm example:node
+
+      - name: Build docs
+        run: pnpm build:docs
+
+  # Rebuild the wasm and the data from espeak-ng's sources with the pinned
+  # toolchain and fail if they differ from what is committed. This is what
+  # keeps the checked-in artifacts honest.
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup toolchain (node, pnpm, emsdk, cmake)
+        uses: jdx/mise-action@v5
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Fetch espeak-ng
+        run: pnpm fetch:espeak
+
+      - name: Rebuild data and wasm
+        run: |
+          pnpm --filter @spelling-creator/spellophone build:data
+          pnpm --filter @spelling-creator/spellophone build:wasm
+
+      - name: Compare with the committed artifacts
+        run: |
+          git status --porcelain packages/spellophone/wasm packages/spellophone/espeak-ng-data
+          git diff --stat --exit-code packages/spellophone/wasm packages/spellophone/espeak-ng-data

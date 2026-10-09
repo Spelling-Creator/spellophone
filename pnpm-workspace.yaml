@@ -1,0 +1,12 @@
+packages:
+  - "packages/*"
+  - "apps/*"
+  - "examples/*"
+
+# Build scripts allowed to run during install. Everything else is blocked,
+# which is pnpm's default and the reason this list exists.
+allowBuilds:
+  esbuild: true
+
+minimumReleaseAgeExclude:
+  - "@types/node@26.6.5"

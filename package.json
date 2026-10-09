@@ -1,0 +1,30 @@
+{
+  "name": "spellophone-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "license": "GPL-3.0-or-later",
+  "author": "Spelling Creator",
+  "type": "module",
+  "scripts": {
+    "fetch:espeak": "node scripts/fetch-espeak.ts",
+    "build": "pnpm --filter @spelling-creator/spellophone build",
+    "build:docs": "pnpm --filter @spellophone/docs build",
+    "dev:docs": "pnpm --filter @spellophone/docs dev",
+    "example:node": "pnpm --filter @spellophone/example-node start",
+    "example:browser": "pnpm --filter @spellophone/example-browser dev",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "oxfmt --check . && oxlint",
+    "fmt": "oxfmt ."
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "oxfmt": "^0.72.0",
+    "oxlint": "^1.87.0",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@12.4.1"
+}
