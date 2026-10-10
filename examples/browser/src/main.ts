@@ -3,6 +3,7 @@ import type {
   SynthesisResult,
 } from "@spelling-creator/spellophone/browser";
 import {
+  canCompileWasm,
   createEspeak,
   encodeWav,
   toFloat32,
@@ -45,12 +46,17 @@ function speakerLanguage(name: string): string {
 
 async function init(): Promise<void> {
   const started = performance.now();
-  espeak = await createEspeak(
-    useCdn ? { cdn: "jsdelivr" } : { dataUrl: "/espeak-ng-data/" },
-  );
+  espeak = await createEspeak({
+    ...(useCdn ? { cdn: "jsdelivr" } : { dataUrl: "/espeak-ng-data/" }),
+    // Where WebAssembly is blocked (iOS Lockdown Mode, a Content-Security-Policy
+    // without 'wasm-unsafe-eval'), run the slower wasm2js build instead. The
+    // dynamic import keeps it in a separate chunk that is only fetched then.
+    fallback: () => import("@spelling-creator/spellophone/wasm2js"),
+  });
   const ms = Math.round(performance.now() - started);
+  const engine = canCompileWasm() ? "WebAssembly" : "wasm2js";
   setStatus(
-    `espeak-ng ${espeak.version} ready in ${ms} ms (${useCdn ? "jsDelivr" : "self-hosted"} data)`,
+    `espeak-ng ${espeak.version} ready in ${ms} ms (${engine}, ${useCdn ? "jsDelivr" : "self-hosted"} data)`,
   );
 
   // One entry per language, voices sorted by name. Dictionaries are fetched

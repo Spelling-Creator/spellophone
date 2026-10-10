@@ -144,26 +144,71 @@ set_target_properties(spellophone PROPERTIES
 # helpers the TypeScript side calls need listing here.
 set(SPELLOPHONE_EXPORTS "_malloc,_free")
 set(SPELLOPHONE_RUNTIME_EXPORTS
-  "FS,NODEFS,UTF8ToString,stringToUTF8,lengthBytesUTF8,HEAPU8,HEAP16,HEAP32")
+  "UTF8ToString,stringToUTF8,lengthBytesUTF8,HEAPU8,HEAP16,HEAP32")
 
-target_link_options(spellophone PRIVATE
+# Options both modules share.
+set(SPELLOPHONE_LINK_OPTIONS
   "-sMODULARIZE=1"
-  "-sEXPORT_ES6=1"
   "-sEXPORT_NAME=createEspeakModule"
-  "-sENVIRONMENT=web,worker,node"
   "-sFORCE_FILESYSTEM=1"
-  "-lnodefs.js"
   "-sALLOW_MEMORY_GROWTH=1"
   "-sINITIAL_MEMORY=32MB"
   "-sSTACK_SIZE=1MB"
   "-sEXPORTED_FUNCTIONS=${SPELLOPHONE_EXPORTS}"
-  "-sEXPORTED_RUNTIME_METHODS=${SPELLOPHONE_RUNTIME_EXPORTS}"
+  "-sASSERTIONS=0"
+)
+
+target_link_options(spellophone PRIVATE
+  ${SPELLOPHONE_LINK_OPTIONS}
+  "-sEXPORT_ES6=1"
+  "-sENVIRONMENT=web,worker,node"
+  "-lnodefs.js"
+  "-sEXPORTED_RUNTIME_METHODS=FS,NODEFS,${SPELLOPHONE_RUNTIME_EXPORTS}"
   "-sINCOMING_MODULE_JS_API=locateFile,wasmBinary,print,printErr,instantiateWasm"
   # Keep Node's process-level handlers out of the host application.
   "-sNODEJS_CATCH_EXIT=0"
   "-sNODEJS_CATCH_REJECTION=0"
   "-sMIN_NODE_VERSION=220000"
   "-sTEXTDECODER=2"
-  "-sASSERTIONS=0"
   "--emit-tsd=espeak-ng.d.ts"
+)
+
+# --- the legacy module ----------------------------------------------------------
+# The same program, linked for JavaScript engines without WebAssembly. This
+# still produces a .wasm file: scripts/build-wasm.ts turns it into JavaScript
+# with Binaryen's wasm2js afterwards, and src/wasm2js.ts hands that to the glue
+# through the instantiateWasm hook. Emscripten's own -sWASM=0 does the same
+# thing, but it is deprecated, while the standalone wasm2js tool is staying.
+#
+# The glue is not built with EXPORT_ES6, which would make it locate the wasm
+# with import.meta.url, and it is web only so it never imports node: modules.
+# Both would get in the way of the ES5 bundle the legacy build ends up as.
+# legacy-prefix.js and legacy-export.js turn it into an ES module.
+add_executable(spellophone-legacy glue.c)
+target_link_libraries(spellophone-legacy PRIVATE espeak-ng)
+target_include_directories(spellophone-legacy PRIVATE "${ESPEAK_CONFIG_DIR}" "${LIB_DIR}")
+set_target_properties(spellophone-legacy PROPERTIES
+  OUTPUT_NAME "espeak-ng.legacy"
+  SUFFIX ".js"
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/legacy"
+  LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/legacy-prefix.js;${CMAKE_CURRENT_SOURCE_DIR}/legacy-export.js"
+)
+target_link_options(spellophone-legacy PRIVATE
+  ${SPELLOPHONE_LINK_OPTIONS}
+  "SHELL:--extern-pre-js \"${CMAKE_CURRENT_SOURCE_DIR}/legacy-prefix.js\""
+  "SHELL:--extern-post-js \"${CMAKE_CURRENT_SOURCE_DIR}/legacy-export.js\""
+  "-sENVIRONMENT=web,worker"
+  "-sEXPORTED_RUNTIME_METHODS=FS,${SPELLOPHONE_RUNTIME_EXPORTS}"
+  "-sINCOMING_MODULE_JS_API=print,printErr,instantiateWasm"
+  # 64-bit values cross between JavaScript and wasm as pairs of 32-bit
+  # numbers instead of BigInts, which ES5 does not have and wasm2js cannot
+  # produce. Emscripten marks the setting deprecated because only -sWASM=0
+  # is meant to need it, so this target prints a warning about it. That one
+  # is expected; it stays visible because -Wno-deprecated would also hide
+  # any other setting that becomes deprecated.
+  "-sWASM_BIGINT=0"
+  # Use TextDecoder when it exists and fall back to plain JavaScript.
+  "-sTEXTDECODER=1"
+  # No eval or new Function, so a strict Content-Security-Policy is fine.
+  "-sDYNAMIC_EXECUTION=0"
 )

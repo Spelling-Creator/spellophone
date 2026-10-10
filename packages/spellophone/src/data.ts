@@ -1,6 +1,13 @@
 import type { MainModule } from "../wasm/espeak-ng.js";
 import type { DataEncoding, DataManifest } from "./manifest.ts";
 
+/**
+ * The Emscripten module this package works with: what `wasm/espeak-ng.js`
+ * produces, or the wasm2js module. Only the former has NODEFS, so it is left
+ * out; `MainModule` from `wasm/espeak-ng.js` is the full type.
+ */
+export type EspeakModule = Omit<MainModule, "NODEFS">;
+
 /** Where the loaders put espeak-ng-data inside the module's virtual file system. */
 export const DATA_PATH = "/espeak-ng-data";
 
@@ -31,13 +38,13 @@ export interface DataSource {
  * Copies files from a `DataSource` into the module's virtual file system.
  */
 export class DataLoader {
-  readonly module: MainModule;
+  readonly module: EspeakModule;
   readonly source: DataSource;
   readonly dataPath: string;
   readonly #pending = new Map<string, Promise<void>>();
 
   constructor(
-    module: MainModule,
+    module: EspeakModule,
     source: DataSource,
     dataPath: string = DATA_PATH,
   ) {
@@ -161,10 +168,12 @@ export async function decode(
 /**
  * A `DataSource` that fetches the files over HTTP from `baseUrl`, the
  * directory that holds `manifest.json`. A trailing slash is optional.
+ * `decodeImpl` replaces `decode`, for engines without `DecompressionStream`.
  */
 export async function httpDataSource(
   baseUrl: string | URL,
   fetchImpl: typeof fetch = fetch,
+  decodeImpl: typeof decode = decode,
 ): Promise<DataSource> {
   let base = String(baseUrl);
   if (!base.endsWith("/")) base += "/";
@@ -203,7 +212,7 @@ export async function httpDataSource(
   }
   return {
     manifest,
-    read: async (file) => decode(await fetchBytes(file), manifest.encoding),
+    read: async (file) => decodeImpl(await fetchBytes(file), manifest.encoding),
   };
 }
 

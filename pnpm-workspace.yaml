@@ -6,6 +6,8 @@ packages:
 # Build scripts allowed to run during install. Everything else is blocked,
 # which is pnpm's default and the reason this list exists.
 allowBuilds:
+  "@swc/core": false
+  core-js: false
   esbuild: true
 
 minimumReleaseAgeExclude:

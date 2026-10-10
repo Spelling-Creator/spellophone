@@ -77,6 +77,23 @@ The Emscripten glue locates `espeak-ng.wasm` relative to itself with
 pattern and emit the wasm as an asset, so there is nothing to configure. If
 your setup needs the file somewhere else, pass `wasmUrl`.
 
+## When WebAssembly is blocked
+
+Safari in Lockdown Mode and pages with a strict Content-Security-Policy
+cannot run WebAssembly. Pass a `fallback` and espeak-ng runs there as plain
+JavaScript instead, about seven times slower:
+
+```ts
+const espeak = await createEspeak({
+  cdn: "jsdelivr",
+  fallback: () => import("@spelling-creator/spellophone/wasm2js"),
+});
+```
+
+The module is only fetched where it is needed. For browsers too old for this
+build altogether, there is an ES5 legacy build. Both are covered in
+[Without WebAssembly](./without-wasm.md).
+
 ## Workers
 
 Synthesis is synchronous and takes a few milliseconds per sentence. For long
@@ -132,6 +149,7 @@ interface BrowserEspeakOptions {
   dataUrl?: string | URL; // directory holding manifest.json
   cdn?: "jsdelivr"; // or fetch the data from jsDelivr
   wasmUrl?: string | URL; // override where espeak-ng.wasm is
+  fallback?: () => Promise<Wasm2jsFallback>; // where WebAssembly is blocked
   languages?: string[] | "all"; // dictionaries to fetch up front, default ["en"]
   phonemeEvents?: boolean | "ipa";
   fetch?: typeof fetch; // custom fetch, for credentials or caching
