@@ -56,19 +56,24 @@ jobs:
         working-directory: packages/spellophone
         run: pnpm pack --out spellophone-${GITHUB_REF_NAME}.tgz
 
+      # Node is set up by mise, not actions/setup-node, so nothing writes the
+      # registry token into an .npmrc for us. Do it by hand for each registry.
       - name: Publish to GitHub Packages
         working-directory: packages/spellophone
-        run: pnpm publish --no-git-checks --registry https://npm.pkg.github.com
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" > ~/.npmrc
+          pnpm publish --no-git-checks --registry https://npm.pkg.github.com
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to npmjs.com
         if: ${{ env.NPM_TOKEN != '' }}
         working-directory: packages/spellophone
-        run: pnpm publish --no-git-checks --registry https://registry.npmjs.org --access public --provenance
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+          pnpm publish --no-git-checks --registry https://registry.npmjs.org --access public --provenance
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Attach the tarball to the release
         run: gh release upload "${GITHUB_REF_NAME}" "packages/spellophone/spellophone-${GITHUB_REF_NAME}.tgz" --clobber
