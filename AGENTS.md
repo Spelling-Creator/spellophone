@@ -63,7 +63,8 @@ Always update the docs if necessary when changing or adding code. If the docs al
 ## Releases
 
 Semantic versioning. Add to `CHANGELOG.md` under `Unreleased` with every
-user-facing change. Releases are tags (`vX.Y.Z`) matching the version in
+user-facing change. Publishing happens when a GitHub release is published,
+with a tag (`vX.Y.Z`) matching the version in
 `packages/spellophone/package.json`; see `apps/docs/docs/project/releasing.md`.
 
 ## Outdated packages

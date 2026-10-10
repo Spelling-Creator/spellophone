@@ -1,19 +1,16 @@
 name: Release
 
-# Publishes @spelling-creator/spellophone when a version tag is pushed.
-#
-#   git tag v0.2.0 && git push origin v0.2.0
-#
-# The tag has to match the version in packages/spellophone/package.json. The
-# package goes to GitHub Packages (always) and to npmjs.com (only when the
-# repository has an NPM_TOKEN secret). A GitHub release is created with the
-# tarball attached and the matching CHANGELOG.md section as its notes.
+# Publishes @spelling-creator/spellophone when a GitHub release is published
+# (Releases > Draft a new release, tag vX.Y.Z). The tag has to match the
+# version in packages/spellophone/package.json. The package goes to GitHub
+# Packages (always) and to npmjs.com (only when the repository has an
+# NPM_TOKEN secret), and the tarball is attached to the release.
 # See apps/docs/docs/project/releasing.md.
 
 on:
-  push:
-    tags:
-      - "v*"
+  release:
+    types:
+      - published
 
 permissions:
   contents: write
@@ -73,18 +70,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Extract release notes from CHANGELOG.md
-        run: |
-          version="${GITHUB_REF_NAME#v}"
-          awk -v v="$version" '
-            $0 ~ "^## \\[" v "\\]" { on = 1; next }
-            on && /^## \[/ { exit }
-            on { print }
-          ' CHANGELOG.md > release-notes.md
-          cat release-notes.md
-
-      - name: Create GitHub release
-        uses: softprops/action-gh-release@v3
-        with:
-          body_path: release-notes.md
-          files: packages/spellophone/spellophone-${{ github.ref_name }}.tgz
+      - name: Attach the tarball to the release
+        run: gh release upload "${GITHUB_REF_NAME}" "packages/spellophone/spellophone-${GITHUB_REF_NAME}.tgz" --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

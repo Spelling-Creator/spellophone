@@ -67,7 +67,7 @@ What does not:
 
 ## Making a release
 
-Releases are cut from `main` by a tag. The workflow in
+Publishing happens when a GitHub release is published. The workflow in
 `.github/workflows/release.yml` does the rest.
 
 1. Update `CHANGELOG.md`: move the `Unreleased` entries under the new version
@@ -78,19 +78,22 @@ Releases are cut from `main` by a tag. The workflow in
    pnpm --filter @spelling-creator/spellophone exec pnpm version minor --no-git-tag-version
    ```
 
-3. Commit and tag. The tag must be `v` plus the version in `package.json`; the
-   workflow checks that they match.
+3. Commit and push to `main`.
 
    ```bash
    git commit -am "Release 0.2.0"
-   git tag v0.2.0
-   git push origin main v0.2.0
+   git push origin main
    ```
 
-4. The workflow builds the package, runs the tests, verifies the committed
-   wasm and data match a fresh build, publishes to GitHub Packages (and
-   npmjs.com if configured) and creates a GitHub release with the tarball
-   attached and the changelog section as its notes.
+4. Create the release on GitHub (Releases, "Draft a new release", or
+   `gh release create v0.2.0 --generate-notes`). The tag must be `v` plus the
+   version in `package.json`; the workflow checks that they match. The
+   changelog section makes good release notes.
 
-The tag is also what makes the `cdn` option work for that version: jsDelivr
-resolves `@v0.2.0` to the tagged commit.
+5. Publishing the release runs the workflow: it builds the package, runs the
+   tests, verifies the committed wasm and data match a fresh build, publishes
+   to GitHub Packages (and npmjs.com if configured) and attaches the tarball
+   to the release.
+
+The release's tag is also what makes the `cdn` option work for that version:
+jsDelivr resolves `@v0.2.0` to the tagged commit.
