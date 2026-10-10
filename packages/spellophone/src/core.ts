@@ -1,8 +1,7 @@
-import type { MainModule } from "../wasm/espeak-ng.js";
-import type { DataLoader } from "./data.ts";
+import type { DataLoader, EspeakModule } from "./data.ts";
 import { DATA_PATH } from "./data.ts";
 
-export type { DataSource } from "./data.ts";
+export type { DataSource, EspeakModule } from "./data.ts";
 export type {
   CoreEntry,
   DataEncoding,
@@ -19,9 +18,6 @@ export {
 } from "./data.ts";
 export { encodeWav, toFloat32 } from "./wav.ts";
 export { VERSION } from "./version.ts";
-
-/** The Emscripten module instance that `wasm/espeak-ng.js` produces. */
-export type EspeakModule = MainModule;
 
 // espeak_PARAMETER values from speak_lib.h.
 const PARAMETER_IDS = {
@@ -256,7 +252,7 @@ export function moduleFactoryOptions(
 }
 
 function withCString<T>(
-  module: MainModule,
+  module: EspeakModule,
   text: string,
   fn: (ptr: number) => T,
 ): T {
@@ -270,7 +266,7 @@ function withCString<T>(
   }
 }
 
-function readLanguages(module: MainModule, ptr: number): VoiceLanguage[] {
+function readLanguages(module: EspeakModule, ptr: number): VoiceLanguage[] {
   const languages: VoiceLanguage[] = [];
   if (ptr === 0) return languages;
   let p = ptr;

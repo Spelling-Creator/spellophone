@@ -26,13 +26,21 @@ function createEspeak(options?: {
   dataUrl?: string | URL; // directory holding manifest.json
   cdn?: "jsdelivr"; // or fetch the data from jsDelivr
   wasmUrl?: string | URL;
+  fallback?: () => Promise<Wasm2jsFallback>; // used where WebAssembly is blocked
   languages?: string[] | "all"; // dictionaries to fetch, default ["en"]
   phonemeEvents?: boolean | "ipa";
   fetch?: typeof fetch;
 }): Promise<Espeak>;
 ```
 
-One of `dataUrl` or `cdn` is required in browsers.
+One of `dataUrl` or `cdn` is required in browsers. `fallback` is normally
+`() => import("@spelling-creator/spellophone/wasm2js")`; see
+[Without WebAssembly](../guide/without-wasm.md).
+
+**Legacy build** (`@spelling-creator/spellophone/legacy`, or the
+`Spellophone` global of `dist/legacy/spellophone.iife.js`): the browser options
+without `wasmUrl` and `fallback`. It runs without WebAssembly and in ES5
+engines.
 
 ## `Espeak`
 
@@ -161,6 +169,13 @@ A WAV file (RIFF, 16-bit PCM, mono) for the samples.
 ### `toFloat32(samples): Float32Array`
 
 The samples scaled to the -1 to 1 range the Web Audio API uses.
+
+### `canCompileWasm(): boolean`
+
+Whether this engine can compile WebAssembly. False where there is no
+`WebAssembly` object or a Content-Security-Policy forbids compiling. Exported
+from the browser entry point; `createEspeak` uses it to decide on the
+`fallback`.
 
 ### `jsdelivrDataUrl(version): string`
 

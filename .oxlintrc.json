@@ -7,6 +7,8 @@
     "vendor/**",
     "build/**",
     "packages/spellophone/wasm/**",
+    // Fragments Emscripten pastes into the legacy glue, not modules of their own.
+    "packages/spellophone/native/*.js",
     "apps/docs/doc_build/**",
     "apps/docs/docs/.vitepress/cache/**"
   ],

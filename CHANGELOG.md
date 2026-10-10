@@ -6,6 +6,29 @@ the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `@spelling-creator/spellophone/wasm2js`: espeak-ng compiled to plain
+  JavaScript by Binaryen's `wasm2js`, for engines without WebAssembly
+  (`createWasm2jsModule`).
+- A `fallback` option for the browser `createEspeak`. Pass
+  `() => import("@spelling-creator/spellophone/wasm2js")` and the wasm2js
+  module is used where WebAssembly is blocked, such as Safari in Lockdown Mode
+  or under a Content-Security-Policy without `wasm-unsafe-eval`.
+  `canCompileWasm()` exposes the check it makes.
+- A legacy build lowered to ES5 with swc, with the polyfills it needs and
+  no WebAssembly: `@spelling-creator/spellophone/legacy` as an ES module, and
+  `dist/legacy/spellophone.iife.js` as a classic script that defines a
+  `Spellophone` global.
+- `httpDataSource` takes an optional third argument that replaces the gzip
+  decoding.
+
+### Changed
+
+- `EspeakModule` (and what `DataLoader` and `Espeak.create` accept) no longer
+  includes `NODEFS`, which the wasm2js module does not have. `MainModule` from
+  `@spelling-creator/spellophone/wasm/espeak-ng.js` is still the full type.
+
 ## [0.1.0] - 2026-10-09
 
 First release. espeak-ng 1.52.0.

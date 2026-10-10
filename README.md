@@ -20,7 +20,9 @@ const wav = encodeWav(samples, sampleRate);
   dictionaries it uses, from your server or from jsDelivr).
 - Word, sentence, mark and phoneme events with text and audio positions.
 - IPA or espeak-ng phoneme output, SSML input.
-- TypeScript, ESM only, no native addon, no server.
+- TypeScript and ES modules, no native addon, no server.
+- Runs as plain JavaScript where WebAssembly is blocked, and ships an ES5
+  build for old browsers, also as a classic script with a global.
 
 **Documentation: https://spellophone.spellingcreator.org/**
 

@@ -10,8 +10,11 @@ transcribes text to phonemes, entirely on the device running it.
 pnpm add @spelling-creator/spellophone
 ```
 
-The package is ESM only and needs Node.js 24 or later, or any browser that
-supports WebAssembly and `DecompressionStream` (every current one).
+The package is made of ES modules and needs Node.js 24 or later, or any
+browser that supports WebAssembly and `DecompressionStream` (every current
+one). Where WebAssembly is blocked, or in browsers as old as Internet
+Explorer 11, it can run as plain JavaScript instead, and the ES5 build also
+comes as a classic script; see [Without WebAssembly](./without-wasm.md).
 
 ## Node.js
 

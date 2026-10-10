@@ -56,6 +56,15 @@
       "types": "./dist/core.d.ts",
       "default": "./dist/core.js"
     },
+    "./wasm2js": {
+      "types": "./dist/wasm2js.d.ts",
+      "default": "./dist/wasm2js.js"
+    },
+    "./legacy": {
+      "types": "./dist/legacy/spellophone.d.ts",
+      "default": "./dist/legacy/spellophone.js"
+    },
+    "./legacy/spellophone.iife.js": "./dist/legacy/spellophone.iife.js",
     "./wasm/espeak-ng.js": {
       "types": "./wasm/espeak-ng.d.ts",
       "default": "./wasm/espeak-ng.js"
@@ -78,7 +87,11 @@
     "prepack": "pnpm build:ts"
   },
   "devDependencies": {
+    "@swc/core": "^1.16.13",
     "@types/node": "^26.6.5",
+    "acorn": "^8.19.0",
+    "core-js": "^3.50.0",
+    "fflate": "^0.8.3",
     "publint": "^0.3.17",
     "tsdown": "^0.23.0",
     "typescript": "^7.0.2",
