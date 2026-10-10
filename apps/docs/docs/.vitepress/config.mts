@@ -85,6 +85,7 @@ export default defineConfig({
           { text: "Getting started", link: "/guide/getting-started" },
           { text: "Node.js", link: "/guide/node" },
           { text: "Browsers and workers", link: "/guide/browser" },
+          { text: "Without WebAssembly", link: "/guide/without-wasm" },
           { text: "Languages and data", link: "/guide/languages" },
           { text: "Events, SSML and phonemes", link: "/guide/speech" },
         ],

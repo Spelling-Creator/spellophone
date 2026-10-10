@@ -55,5 +55,8 @@ export default defineConfig({
   plugins: [espeakData()],
   build: {
     target: "es2022",
+    // The wasm2js fallback chunk is about 740 kB. It is only fetched where
+    // WebAssembly is blocked, so its size does not matter otherwise.
+    chunkSizeWarningLimit: 800,
   },
 });

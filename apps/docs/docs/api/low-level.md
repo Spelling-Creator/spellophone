@@ -59,7 +59,9 @@ use `loadVoice` or `loadLanguages` first.
 
 Two implementations ship with the package:
 
-- `httpDataSource(baseUrl, fetch?)` fetches from a URL (browsers).
+- `httpDataSource(baseUrl, fetch?, decode?)` fetches from a URL (browsers).
+  `decode` replaces the decompression step, for engines without
+  `DecompressionStream`.
 - `fileDataSource(dir?)` reads from a directory (`@spelling-creator/spellophone/node` only).
 
 `decode(bytes, encoding)` is the decompression helper they share.
@@ -98,11 +100,33 @@ The options the entry points pass to the module factory: an optional
 dictionary file" message (an expected event, since it is what triggers loading
 the dictionary) while letting everything else through to `console.error`.
 
+## The wasm2js module
+
+`@spelling-creator/spellophone/wasm2js` exports `createWasm2jsModule(options?)`,
+which returns the same module without WebAssembly: espeak-ng compiled to
+JavaScript by Binaryen's `wasm2js`. It takes the same options as the wasm
+factory (only `printErr` matters) and works with `DataLoader` and
+`Espeak.create` the same way:
+
+```ts
+import { createWasm2jsModule } from "@spelling-creator/spellophone/wasm2js";
+
+const module = await createWasm2jsModule(moduleFactoryOptions());
+```
+
+It is what the browser entry point's `fallback` loads, and what the legacy
+build is built on. Behind it are two generated files in the package's `wasm/`
+directory: `espeak-ng.legacy.js`, the Emscripten glue, and
+`espeak-ng.legacy.wasm.js`, the module itself.
+
 ## The wasm module
 
 `@spelling-creator/spellophone/wasm/espeak-ng.js` is the Emscripten-generated ES module. Its
-default export is the module factory; the `MainModule` type (exported as
-`EspeakModule`) lists the `_sp_*` functions the C glue exports. They take and
-return integers and C strings and are documented in
-`packages/spellophone/native/glue.c`. `Espeak.module` gives access to them on
-a running instance, should you need something the wrapper does not expose.
+default export is the module factory; the `MainModule` type lists the `_sp_*`
+functions the C glue exports. They take and return integers and C strings and
+are documented in `packages/spellophone/native/glue.c`. `Espeak.module` gives
+access to them on a running instance, should you need something the wrapper
+does not expose.
+
+`EspeakModule`, the type the rest of the API takes, is `MainModule` minus
+`NODEFS`, so the wasm2js module fits it too.
