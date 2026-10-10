@@ -92,6 +92,21 @@ Emscripten options that matter (all in the CMake file):
   the stack.
 - `--emit-tsd`: generates the module's TypeScript declarations.
 
+## Patches to espeak-ng
+
+`vendor/patches/*.patch` are applied to the checkout by `pnpm fetch:espeak`
+(idempotently, so running it again is safe). Keep them few and small; each
+one is a candidate to send upstream.
+
+- `0001-deterministic-dictionary-compile.patch`: the dictionary compiler
+  sorts rules with `qsort`, whose order for tied entries depends on the C
+  library, so the same sources compiled to different bytes on macOS and
+  Linux. The patch makes both sorts stable. Without it the reproducibility
+  check in CI cannot pass for a build made on a Mac.
+
+To change a patch, edit the files in `vendor/espeak-ng`, then regenerate it
+with `git -C vendor/espeak-ng diff > vendor/patches/<name>.patch`.
+
 ## Bumping espeak-ng
 
 1. Change `tag` in `vendor/espeak-ng.json`.

@@ -1,0 +1,59 @@
+diff --git a/src/libespeak-ng/compiledict.c b/src/libespeak-ng/compiledict.c
+index 9304f4e..fd43e47 100644
+--- a/src/libespeak-ng/compiledict.c
++++ b/src/libespeak-ng/compiledict.c
+@@ -148,6 +148,7 @@ typedef struct {
+ 	void *start;
+ 	size_t length;
+ 	int group3_ix;
++	int index; // position in the rules file, to keep sorting deterministic
+ } RGROUP;
+ 
+ typedef enum
+@@ -1191,7 +1192,28 @@ static int __cdecl rgroup_sorter(RGROUP *a, RGROUP *b)
+ 	if (ix != 0) return ix;
+ 	ix = strcmp(a->name, b->name);
+ 	if (ix != 0) return ix;
+-	return (uintptr_t)a->start - (uintptr_t)b->start;
++	return a->index - b->index;
++}
++
++// qsort() is not stable, and string_sorter() has ties (rules with the same
++// phoneme and match strings), so the order of tied rules, and with it the
++// bytes of the compiled dictionary, would depend on the C library. An
++// insertion sort keeps ties in file order on every platform. Groups hold at
++// most N_RULES entries, so the quadratic cost does not matter.
++static void stable_sort_rules(char **rules, int n_rules)
++{
++	int i, j;
++	char *key;
++
++	for (i = 1; i < n_rules; i++) {
++		key = rules[i];
++		j = i - 1;
++		while (j >= 0 && string_sorter(&rules[j], &key) > 0) {
++			rules[j+1] = rules[j];
++			j--;
++		}
++		rules[j+1] = key;
++	}
+ }
+ 
+ static void* output_rule_group(int n_rules, char **rules, char *name, size_t *outsize)
+@@ -1213,7 +1235,7 @@ static void* output_rule_group(int n_rules, char **rules, char *name, size_t *ou
+ 
+ 	// sort the rules in this group by their phoneme string
+ 	common = "";
+-	qsort((void *)rules, n_rules, sizeof(char *), (int(__cdecl *)(const void *, const void *))string_sorter);
++	stable_sort_rules(rules, n_rules);
+ 
+ 	if (strcmp(name, "9") == 0)
+ 		len_name = 0; //  don't remove characters from numeric match strings
+@@ -1375,6 +1397,7 @@ static espeak_ng_STATUS compile_dictrules(CompileContext *ctx, FILE *f_in, FILE
+ 				strcpy(rgroup[n_rgroups].name, ctx->group_name);
+ 				rgroup[n_rgroups].group3_ix = ctx->group3_ix;
+ 				rgroup[n_rgroups].start = output_rule_group(n_rules, rules, ctx->group_name, &rgroup[n_rgroups].length);
++				rgroup[n_rgroups].index = n_rgroups;
+ 				n_rgroups++;
+ 
+ 				count += n_rules;
