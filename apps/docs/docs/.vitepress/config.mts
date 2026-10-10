@@ -27,6 +27,14 @@ export default defineConfig({
   description:
     "espeak-ng text-to-speech and phoneme transcription for Node.js and browsers, compiled to WebAssembly.",
 
+  // The same favicon as spellingcreator.org (copied from the Spelling Creator
+  // repository into docs/public).
+  head: [
+    ["link", { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" }],
+    ["link", { rel: "icon", href: "/favicon.ico", sizes: "any" }],
+    ["link", { rel: "apple-touch-icon", href: "/apple-touch-icon.png" }],
+  ],
+
   sitemap: {
     hostname: `${SITE_ORIGIN}${BASE}`,
   },
