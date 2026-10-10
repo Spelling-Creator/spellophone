@@ -85,3 +85,16 @@ jobs:
         run: |
           git status --porcelain packages/spellophone/wasm packages/spellophone/espeak-ng-data
           git diff --stat --exit-code packages/spellophone/wasm packages/spellophone/espeak-ng-data
+
+      # When they differ, keep what this runner built so the difference can be
+      # inspected locally (gh run download <id> -n rebuilt-artifacts).
+      - name: Upload the rebuilt artifacts
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rebuilt-artifacts
+          path: |
+            packages/spellophone/wasm
+            packages/spellophone/espeak-ng-data
+            build/espeak-ng-data
+          retention-days: 7

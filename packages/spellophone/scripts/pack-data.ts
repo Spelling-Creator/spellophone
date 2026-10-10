@@ -11,7 +11,7 @@
 // available in every runtime this library targets, so no CDN or server has to
 // be trusted to compress the transfer.
 
-import { gzipSync } from "node:zlib";
+import { crc32, deflateRawSync } from "node:zlib";
 import {
   mkdirSync,
   readdirSync,
@@ -36,8 +36,32 @@ function listFiles(dir: string, root: string = dir): string[] {
   return out;
 }
 
+/**
+ * gzip with a fixed header. zlib's own gzip writer stamps the host OS into
+ * the header (3 on Linux, 19 on macOS), so the same input packs differently
+ * on different machines and CI could not compare its rebuild with the
+ * committed files. The container is built by hand instead: a 10-byte header
+ * with mtime 0 and OS "unknown", the raw deflate stream, then CRC-32 and the
+ * input size, which is all RFC 1952 asks for. Every gzip reader accepts it.
+ */
 function gzip(bytes: Uint8Array): Uint8Array {
-  return gzipSync(bytes, { level: 9 });
+  const body = deflateRawSync(bytes, { level: 9 });
+  const header = Buffer.from([
+    0x1f,
+    0x8b, // magic
+    0x08, // deflate
+    0x00, // no flags: no name, comment or extra fields
+    0x00,
+    0x00,
+    0x00,
+    0x00, // mtime: none
+    0x02, // xfl: maximum compression
+    0xff, // os: unknown
+  ]);
+  const trailer = Buffer.alloc(8);
+  trailer.writeUInt32LE(crc32(bytes) >>> 0, 0);
+  trailer.writeUInt32LE(bytes.length >>> 0, 4);
+  return Buffer.concat([header, body, trailer]);
 }
 
 export function packData(
