@@ -18,17 +18,19 @@ const config: UserConfig = defineConfig({
   dts: true,
   sourcemap: true,
   clean: true,
-  external: [
-    // The Emscripten glue stays a separate file next to the wasm it loads: it
-    // locates espeak-ng.wasm relative to its own import.meta.url, and bundlers
-    // in consuming apps (Vite and friends) pick that up as an asset reference.
-    // dist/*.js import it as ../wasm/espeak-ng.js, which is also where it lives
-    // in the published package.
-    /\/wasm\/espeak-ng\.js$/,
-    // Only src/node.ts imports these; the platform is neutral so the browser
-    // entry does not get Node shims.
-    /^node:/,
-  ],
+  deps: {
+    neverBundle: [
+      // The Emscripten glue stays a separate file next to the wasm it loads:
+      // it locates espeak-ng.wasm relative to its own import.meta.url, and
+      // bundlers in consuming apps (Vite and friends) pick that up as an asset
+      // reference. dist/*.js import it as ../wasm/espeak-ng.js, which is also
+      // where it lives in the published package.
+      /\/wasm\/espeak-ng\.js$/,
+      // Only src/node.ts imports these; the platform is neutral so the browser
+      // entry does not get Node shims.
+      /^node:/,
+    ],
+  },
   define: {
     __SPELLOPHONE_VERSION__: JSON.stringify(pkg.version),
   },
