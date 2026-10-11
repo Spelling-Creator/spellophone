@@ -220,11 +220,9 @@ export async function httpDataSource(
  * The jsDelivr URL of this package's data directory for a given version, for
  * apps that would rather not host the data themselves.
  *
- * This is jsDelivr's GitHub endpoint, serving the files committed in the
- * repository at the release tag, so it needs no npm registry at all: the
- * package itself is published to GitHub Packages, which jsDelivr does not
- * mirror.
+ * This is jsDelivr's npm endpoint, serving the `espeak-ng-data` directory of
+ * the package as published to npmjs.com.
  */
 export function jsdelivrDataUrl(version: string): string {
-  return `https://cdn.jsdelivr.net/gh/Spelling-Creator/spellophone@v${version}/packages/spellophone/espeak-ng-data/`;
+  return `https://cdn.jsdelivr.net/npm/@spelling-creator/spellophone@${version}/espeak-ng-data/`;
 }
