@@ -26,8 +26,10 @@ espeak.setVoice({ language: "en", gender: "female" });
 espeak.setVoice({ name: "English (Received Pronunciation)" });
 ```
 
-espeak-ng matches the closest voice it has, so `en-us-x-anything` still finds
-`en-us`. An unknown name throws `EspeakError`.
+A string is tried as a voice name first and then as a language, the way the
+`espeak-ng -v` command line does it. As a language, espeak-ng matches the
+closest voice it has, so `en-us-x-anything` still finds `en-us`. A string that
+matches no voice name and no language throws `EspeakError`.
 
 ### Variants
 

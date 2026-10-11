@@ -66,6 +66,17 @@ describe("createEspeak (node)", () => {
     ).toBe(true);
   });
 
+  it("selects voices by a language tag with no voice file of that name", () => {
+    // British English is the file gmw/en, so "en-gb" only matches as a language.
+    espeak.setVoice("en-gb");
+    expect(
+      espeak.voice?.languages.some((l) => l.name.startsWith("en-gb")),
+    ).toBe(true);
+    expect(espeak.phonemes("tomato", { voice: "en-gb" })).toBe(
+      espeak.phonemes("tomato", { voice: "en" }),
+    );
+  });
+
   it("applies per-call parameter overrides without keeping them", () => {
     espeak.setVoice("en-us");
     const before = espeak.getParameter("rate");
@@ -76,8 +87,10 @@ describe("createEspeak (node)", () => {
   });
 
   it("rejects unknown voices", () => {
-    // Not "klingon": espeak-ng really does ship one (piqd).
-    expect(() => espeak.setVoice("no-such-voice")).toThrow(/No voice matches/);
+    // Not "klingon": espeak-ng really does ship one (piqd). Nor anything
+    // starting with a language code, such as "no-such-voice", which a string
+    // falls back to as a language and finds Norwegian.
+    expect(() => espeak.setVoice("xyzzy")).toThrow(/No voice matches/);
   });
 
   it("reports SSML marks", () => {

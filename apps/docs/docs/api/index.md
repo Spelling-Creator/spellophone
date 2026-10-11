@@ -72,8 +72,10 @@ interface Voice {
 
 ### `setVoice(selector): void`
 
-Selects a voice by name or language tag (`"en-us"`, `"de"`, `"en-us+f3"`) or by
-properties:
+Selects a voice by name or language tag (`"en-us"`, `"en-gb"`, `"de"`,
+`"en-us+f3"`) or by properties. A string is matched against voice names first
+and then used as a language, as `espeak-ng -v` does. Properties are a
+`VoiceSelector`:
 
 ```ts
 interface VoiceSelector {

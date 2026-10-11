@@ -513,23 +513,30 @@ export class Espeak {
 
   #selectVoice(selector: string | VoiceSelector): void {
     const m = this.module;
-    let status: number;
-    if (typeof selector === "string") {
-      status = withCString(m, selector, (ptr) => m._sp_set_voice_by_name(ptr));
-    } else {
+    const byProperties = (props: VoiceSelector): number => {
       const gender =
-        selector.gender === "male" ? 1 : selector.gender === "female" ? 2 : 0;
-      status = withCString(m, selector.name ?? "", (name) =>
-        withCString(m, selector.language ?? "", (language) =>
+        props.gender === "male" ? 1 : props.gender === "female" ? 2 : 0;
+      return withCString(m, props.name ?? "", (name) =>
+        withCString(m, props.language ?? "", (language) =>
           m._sp_set_voice_by_properties(
             name,
             language,
             gender,
-            selector.age ?? 0,
-            selector.variant ?? 0,
+            props.age ?? 0,
+            props.variant ?? 0,
           ),
         ),
       );
+    };
+    let status: number;
+    if (typeof selector === "string") {
+      status = withCString(m, selector, (ptr) => m._sp_set_voice_by_name(ptr));
+      // espeak_SetVoiceByName only matches voice file names and voice names,
+      // so a language such as "en-gb" (in the file gmw/en) finds nothing.
+      // Retry it as a language, as the espeak-ng command line does.
+      if (status !== 0) status = byProperties({ language: selector });
+    } else {
+      status = byProperties(selector);
     }
     if (status !== 0) {
       const description =

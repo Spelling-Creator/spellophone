@@ -6,6 +6,13 @@ the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- `setVoice` (and the `voice` option of `synthesize` and `phonemes`) now
+  accepts a language tag that has no voice file of the same name, such as
+  `"en-gb"`. A string that matches no voice name is retried as a language,
+  as the `espeak-ng -v` command line does.
+
 ## [0.2.0] - 2026-10-10
 
 espeak-ng 1.52.0, unchanged.
