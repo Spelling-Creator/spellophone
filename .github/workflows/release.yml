@@ -2,10 +2,9 @@ name: Release
 
 # Publishes @spelling-creator/spellophone when a GitHub release is published
 # (Releases > Draft a new release, tag vX.Y.Z). The tag has to match the
-# version in packages/spellophone/package.json. The package goes to GitHub
-# Packages (always) and to npmjs.com (only when the repository has an
-# NPM_TOKEN secret), and the tarball is attached to the release.
-# See apps/docs/docs/project/releasing.md.
+# version in packages/spellophone/package.json. The package goes to npmjs.com
+# through trusted publishing (OIDC, no token), and the same tarball is
+# attached to the release. See apps/docs/docs/project/releasing.md.
 
 on:
   release:
@@ -14,7 +13,9 @@ on:
 
 permissions:
   contents: write
-  packages: write
+  # Lets npm exchange the workflow's OIDC token for a short-lived publish
+  # token. npm checks it against the trusted publisher configured for the
+  # package, which names this repository and release.yml.
   id-token: write
 
 jobs:
@@ -38,16 +39,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Fetch espeak-ng
-        run: pnpm fetch:espeak
-
-      # `pnpm build` runs build:data, build:wasm and build:ts. The first two
-      # must reproduce the committed artifacts exactly.
+      # `pnpm build` fetches espeak-ng, then runs build:data, build:wasm and
+      # build:ts. CI has already checked that this build is reproducible.
       - name: Build
         run: pnpm build
-
-      - name: Check that the committed wasm and data are up to date
-        run: git diff --stat --exit-code packages/spellophone/wasm packages/spellophone/espeak-ng-data
 
       - name: Test
         run: pnpm test
@@ -56,24 +51,13 @@ jobs:
         working-directory: packages/spellophone
         run: pnpm pack --out spellophone-${GITHUB_REF_NAME}.tgz
 
-      # Node is set up by mise, not actions/setup-node, so nothing writes the
-      # registry token into an .npmrc for us. Do it by hand for each registry.
-      - name: Publish to GitHub Packages
-        working-directory: packages/spellophone
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" > ~/.npmrc
-          pnpm publish --no-git-checks --registry https://npm.pkg.github.com
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+      # Publish the tarball packed above, so npm gets byte for byte what is
+      # attached to the release. This uses the npm CLI rather than pnpm
+      # because npm is what implements trusted publishing (it needs 11.5.1 or
+      # later, which Node 24 ships). Provenance is attached automatically.
       - name: Publish to npmjs.com
-        if: ${{ env.NPM_TOKEN != '' }}
         working-directory: packages/spellophone
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-          pnpm publish --no-git-checks --registry https://registry.npmjs.org --access public --provenance
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish "spellophone-${GITHUB_REF_NAME}.tgz" --access public
 
       - name: Attach the tarball to the release
         run: gh release upload "${GITHUB_REF_NAME}" "packages/spellophone/spellophone-${GITHUB_REF_NAME}.tgz" --clobber

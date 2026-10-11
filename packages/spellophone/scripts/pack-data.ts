@@ -39,8 +39,8 @@ function listFiles(dir: string, root: string = dir): string[] {
 /**
  * gzip with a fixed header. zlib's own gzip writer stamps the host OS into
  * the header (3 on Linux, 19 on macOS), so the same input packs differently
- * on different machines and CI could not compare its rebuild with the
- * committed files. The container is built by hand instead: a 10-byte header
+ * on different machines and CI could not compare its Linux and macOS
+ * builds. The container is built by hand instead: a 10-byte header
  * with mtime 0 and OS "unknown", the raw deflate stream, then CRC-32 and the
  * input size, which is all RFC 1952 asks for. Every gzip reader accepts it.
  */

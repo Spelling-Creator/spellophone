@@ -2,48 +2,52 @@
 
 ## Where the package is published
 
-Spellophone was made for [Spelling Creator](https://spellingcreator.org), and
-that is where it is expected to be used, so it is published to the
-organization's own registry,
-[GitHub Packages](https://github.com/orgs/Spelling-Creator/packages), under the
-organization's scope, as `@spelling-creator/spellophone`. It is the first
-Spelling Creator package published anywhere; the monorepo's `core` package may
-follow the same route one day.
+Spellophone is published to
+[npmjs.com](https://www.npmjs.com/package/@spelling-creator/spellophone) under
+the Spelling Creator organization's scope, as `@spelling-creator/spellophone`,
+so it installs with no extra registry setup:
 
-GitHub Packages needs a token even to read public packages. To install:
+```bash
+pnpm add @spelling-creator/spellophone
+```
 
-1. Create a [personal access token](https://github.com/settings/tokens) with
-   the `read:packages` scope (a classic token; fine-grained tokens do not
-   cover packages yet).
-2. Tell your package manager that the `@spelling-creator` scope lives on
-   GitHub. In the project's `.npmrc` (or `~/.npmrc`):
+Every release also has the package tarball attached on
+[GitHub](https://github.com/Spelling-Creator/spellophone/releases). It is the
+exact file that was published to npm, so it can be installed directly
+(`pnpm add ./spellophone-v0.2.0.tgz`) or compared against the registry.
 
-   ```ini
-   @spelling-creator:registry=https://npm.pkg.github.com
-   //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
-   ```
-
-3. Export the token and install:
-
-   ```bash
-   export GITHUB_TOKEN=ghp_...
-   pnpm add @spelling-creator/spellophone
-   ```
-
-In GitHub Actions, `secrets.GITHUB_TOKEN` already has `read:packages` for
-repositories in the same organization, so step 1 is not needed there.
-
-The data for browsers does not go through the registry at all: the `cdn`
-option fetches it from jsDelivr's GitHub endpoint, which serves the files
-committed in this repository at the release tag. See
+The `cdn` option fetches the browser data from jsDelivr's npm endpoint, which
+serves the `espeak-ng-data` directory of the published package. See
 [Browsers and workers](../guide/browser.md#fetch-it-from-jsdelivr).
 
-### npmjs.com
+Version 0.1.0 was published only to GitHub Packages, before the move to
+npmjs.com, and its `cdn` option reads from jsDelivr's GitHub endpoint instead.
 
-The release workflow also publishes to npmjs.com when the repository has an
-`NPM_TOKEN` secret. Nothing in the library depends on that; it is there so the
-package can be installed without a GitHub token if the maintainers decide to
-publish there.
+### Trusted publishing
+
+The release workflow publishes with npm's
+[trusted publishing](https://docs.npmjs.com/trusted-publishers): GitHub
+Actions hands npm a short-lived OIDC token, and npm accepts it because the
+package names this repository and workflow as its trusted publisher. There is
+no npm token stored anywhere, and every version gets a
+[provenance attestation](https://docs.npmjs.com/generating-provenance-statements)
+linking it to the commit and workflow run that built it.
+
+The trusted publisher is set on npmjs.com, in the package's settings under
+"Trusted publishing":
+
+| Field             | Value              |
+| ----------------- | ------------------ |
+| Publisher         | GitHub Actions     |
+| Organization      | `Spelling-Creator` |
+| Repository        | `spellophone`      |
+| Workflow filename | `release.yml`      |
+| Environment       | (empty)            |
+
+Renaming the workflow file or moving the repository breaks publishing until
+this is updated. Once it works, npm recommends setting the package's
+publishing access to "Require two-factor authentication and disallow tokens"
+so that nothing but the workflow can publish.
 
 ## Versioning
 
@@ -90,10 +94,8 @@ Publishing happens when a GitHub release is published. The workflow in
    version in `package.json`; the workflow checks that they match. The
    changelog section makes good release notes.
 
-5. Publishing the release runs the workflow: it builds the package, runs the
-   tests, verifies the committed wasm and data match a fresh build, publishes
-   to GitHub Packages (and npmjs.com if configured) and attaches the tarball
-   to the release.
+5. Publishing the release runs the workflow: it builds the package from
+   source, wasm and data included, runs the tests, packs the tarball,
+   publishes it to npmjs.com and attaches it to the release.
 
-The release's tag is also what makes the `cdn` option work for that version:
-jsDelivr resolves `@v0.2.0` to the tagged commit.
+The `cdn` option works for the new version as soon as it is on npmjs.com.

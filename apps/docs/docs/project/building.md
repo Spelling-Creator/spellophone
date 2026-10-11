@@ -10,30 +10,19 @@ The repository is a pnpm workspace:
 | `examples/browser`     | Vite browser example                                     |
 | `vendor/`              | The pinned espeak-ng version (fetched, not committed)    |
 
-## Working on the TypeScript
+## Setting up
 
-The compiled wasm and data are committed, so this needs only Node.js 24+ and
-pnpm:
+The wasm and the data are build output and not in git, so the first build
+compiles them from espeak-ng's sources. Prerequisites:
 
-```bash
-pnpm install
-pnpm --filter @spelling-creator/spellophone build:ts   # tsdown
-pnpm test
-pnpm typecheck
-pnpm fmt && pnpm lint                                  # oxfmt and oxlint
-```
-
-## Rebuilding the wasm and data
-
-Needed when bumping espeak-ng or changing `native/glue.c`. Prerequisites:
-
+- Node.js 24+ and pnpm
 - [Emscripten](https://emscripten.org/) (`emcc`, `emcmake`)
 - CMake and a host C/C++ compiler (clang or gcc), for the native espeak-ng
   build that compiles the dictionaries
 - git
 
-`mise.toml` pins everything, so with [mise](https://mise.jdx.dev/) it is one
-command:
+`mise.toml` pins all of them except the C compiler, so with
+[mise](https://mise.jdx.dev/) it is one command:
 
 ```bash
 mise install
@@ -42,9 +31,27 @@ mise install
 Then:
 
 ```bash
-pnpm fetch:espeak      # clones espeak-ng at the tag in vendor/espeak-ng.json
-pnpm build             # build:data, build:wasm, build:ts
+pnpm install
+pnpm build             # fetch:espeak, then build:data, build:wasm, build:ts
 ```
+
+`pnpm fetch:espeak` clones espeak-ng at the tag in `vendor/espeak-ng.json`
+and leaves an existing checkout at that tag alone. The whole build takes well
+under a minute.
+
+After that, day to day:
+
+```bash
+pnpm --filter @spelling-creator/spellophone build:ts   # tsdown
+pnpm test
+pnpm typecheck
+pnpm fmt && pnpm lint                                  # oxfmt and oxlint
+```
+
+Rerun `pnpm build` after bumping espeak-ng or changing anything in `native/`
+or the build scripts.
+
+## What the build does
 
 The three steps, and what they produce:
 
@@ -61,9 +68,13 @@ The three steps, and what they produce:
 3. **`build:ts`** bundles `src/` into `dist/` with tsdown, with declarations,
    and builds the ES5 legacy build into `dist/legacy/`.
 
-Commit the updated `wasm/` and `espeak-ng-data/` with the change that caused
-them. CI rebuilds both and fails if they differ from what is committed, so a
-stale artifact cannot slip into a release.
+## Reproducibility
+
+The build is reproducible: the same sources give the same bytes, on any
+machine. CI builds the wasm and data on Linux and on macOS and fails if the
+two differ in any file. The release workflow builds the published package
+from the tag the same way, so anyone can rebuild a release and compare it
+with the tarball on npm or on the GitHub release.
 
 ## How the wasm build works
 
@@ -172,11 +183,10 @@ with `git -C vendor/espeak-ng diff > vendor/patches/<name>.patch`.
 ## Bumping espeak-ng
 
 1. Change `tag` in `vendor/espeak-ng.json`.
-2. `pnpm fetch:espeak && pnpm build`.
+2. `pnpm build`.
 3. Run the tests. Phoneme output for a word can change between espeak-ng
    releases, so a failing assertion may just need updating.
-4. Commit, including `wasm/` and `espeak-ng-data/`, and note the espeak-ng
-   version in the changelog.
+4. Commit, and note the espeak-ng version in the changelog.
 
 ## Checking the browser example
 

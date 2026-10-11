@@ -28,15 +28,6 @@ const wav = encodeWav(samples, sampleRate);
 
 ## Install
 
-The package is published to GitHub Packages as `@spelling-creator/spellophone`.
-Point the scope at GitHub in your `.npmrc` and install with a token that has
-`read:packages`:
-
-```ini
-@spelling-creator:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
-```
-
 ```bash
 pnpm add @spelling-creator/spellophone
 ```
@@ -55,7 +46,9 @@ for Node.js and browser usage.
 | `examples/browser`     | `@spellophone/example-browser`  | Vite page with Web Audio playback  |
 
 ```bash
+mise install              # Node.js, pnpm, the Emscripten SDK and CMake
 pnpm install
+pnpm build                # compiles the wasm and data from espeak-ng's sources
 pnpm test                 # vitest
 pnpm typecheck            # tsc (TypeScript 7)
 pnpm fmt && pnpm lint     # oxfmt and oxlint
@@ -64,9 +57,8 @@ pnpm example:browser
 pnpm dev:docs
 ```
 
-The compiled wasm and data are committed, so the above needs only Node.js 24+
-and pnpm. Rebuilding them from espeak-ng's sources needs the Emscripten SDK and
-CMake; `mise install` provides both. See
+The wasm and data are not in git. `pnpm build` compiles them in well under a
+minute, and also needs a host C compiler. See
 [Building from source](https://spellophone.spellingcreator.org/project/building).
 
 ## License

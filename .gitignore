@@ -6,12 +6,11 @@ dist/
 build/
 *.tsbuildinfo
 
-# Fetched espeak-ng sources (pnpm fetch:espeak). The artifacts built from them
-# (packages/spellophone/wasm and espeak-ng-data) ARE checked in: jsDelivr
-# serves them straight from the repository at a release tag, and contributors
-# to the TypeScript side do not need the emsdk that way. See
-# apps/docs/docs/project/building.md.
+# Fetched espeak-ng sources (pnpm fetch:espeak) and the wasm and data built
+# from them (pnpm build). See apps/docs/docs/project/building.md.
 vendor/espeak-ng/
+packages/spellophone/wasm/
+packages/spellophone/espeak-ng-data/
 
 # VitePress
 apps/docs/doc_build/

@@ -75,7 +75,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://registry.npmjs.org"
   },
   "scripts": {
     "build": "pnpm build:data && pnpm build:wasm && pnpm build:ts",

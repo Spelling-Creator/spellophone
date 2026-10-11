@@ -12,9 +12,58 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Lint, type-check, test and build everything that only needs Node.js. The
-  # committed wasm and data are used as they are.
+  # Build the wasm and the data from espeak-ng's sources with the pinned
+  # toolchain, on Linux and on macOS. The other jobs use what Linux built.
+  native:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup toolchain (node, pnpm, emsdk, cmake)
+        uses: jdx/mise-action@v5
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Fetch espeak-ng
+        run: pnpm fetch:espeak
+
+      - name: Build data and wasm
+        run: |
+          pnpm --filter @spelling-creator/spellophone build:data
+          pnpm --filter @spelling-creator/spellophone build:wasm
+
+      - name: Upload the wasm and data
+        uses: actions/upload-artifact@v7
+        with:
+          name: native-${{ matrix.os }}
+          path: |
+            packages/spellophone/wasm
+            packages/spellophone/espeak-ng-data
+          retention-days: 7
+
+  # The two builds must be identical, byte for byte. Anyone can then rebuild a
+  # release from its tag and check it against what is on npm. When they
+  # differ, both builds stay downloadable from the run for 7 days
+  # (gh run download <id>).
+  reproduce:
+    needs: native
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download both builds
+        uses: actions/download-artifact@v8
+
+      - name: Compare
+        run: diff --recursive --brief native-ubuntu-latest native-macos-latest
+
+  # Lint, type-check, test and build everything else, with the Linux build of
+  # the wasm and data.
   check:
+    needs: native
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -37,6 +86,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Download the wasm and data
+        uses: actions/download-artifact@v8
+        with:
+          name: native-ubuntu-latest
+          path: packages/spellophone
+
       - name: Lint and format check
         run: pnpm lint
 
@@ -57,44 +112,3 @@ jobs:
 
       - name: Build docs
         run: pnpm build:docs
-
-  # Rebuild the wasm and the data from espeak-ng's sources with the pinned
-  # toolchain and fail if they differ from what is committed. This is what
-  # keeps the checked-in artifacts honest.
-  reproduce:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup toolchain (node, pnpm, emsdk, cmake)
-        uses: jdx/mise-action@v5
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Fetch espeak-ng
-        run: pnpm fetch:espeak
-
-      - name: Rebuild data and wasm
-        run: |
-          pnpm --filter @spelling-creator/spellophone build:data
-          pnpm --filter @spelling-creator/spellophone build:wasm
-
-      - name: Compare with the committed artifacts
-        run: |
-          git status --porcelain packages/spellophone/wasm packages/spellophone/espeak-ng-data
-          git diff --stat --exit-code packages/spellophone/wasm packages/spellophone/espeak-ng-data
-
-      # When they differ, keep what this runner built so the difference can be
-      # inspected locally (gh run download <id> -n rebuilt-artifacts).
-      - name: Upload the rebuilt artifacts
-        if: failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: rebuilt-artifacts
-          path: |
-            packages/spellophone/wasm
-            packages/spellophone/espeak-ng-data
-            build/espeak-ng-data
-          retention-days: 7

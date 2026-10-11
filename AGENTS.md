@@ -3,23 +3,23 @@
 ## Overview
 
 This is a WebAssembly port of `espeak-ng` by the Spelling Creator organization,
-published as `@spelling-creator/spellophone` on GitHub Packages. The docs live
+published as `@spelling-creator/spellophone` on npmjs.com. The docs live
 at https://spellophone.spellingcreator.org (source in `apps/docs/docs`).
 
 Layout:
 
 - `packages/spellophone`: the library. `native/` holds the C glue and the
   Emscripten CMake project, `src/` the TypeScript, `scripts/` the build steps,
-  `wasm/` and `espeak-ng-data/` the committed build artifacts.
+  `wasm/` and `espeak-ng-data/` the build output (not committed).
 - `apps/docs`: VitePress docs.
 - `examples/node`, `examples/browser`: runnable examples, also built in CI.
 - `vendor/espeak-ng`: the pinned espeak-ng checkout (`pnpm fetch:espeak`), not
   committed. `vendor/espeak-ng.json` pins the tag.
 
-The compiled `wasm/` and `espeak-ng-data/` are checked in on purpose: jsDelivr
-serves the data from the repository at release tags, and TypeScript work needs
-no emsdk that way. Rebuild them (`pnpm build`) only when bumping espeak-ng or
-changing `native/`; CI fails if they do not match a fresh build.
+Build `wasm/` and `espeak-ng-data/` with `mise install && pnpm build` before
+testing or type-checking, and again after bumping espeak-ng or changing
+`native/` or the build scripts. The build must stay reproducible: CI builds
+on Linux and macOS and fails if the outputs differ.
 
 ## Language
 

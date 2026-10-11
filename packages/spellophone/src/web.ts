@@ -56,8 +56,8 @@ export interface BrowserEspeakOptions extends Omit<
   dataUrl?: string | URL;
   /**
    * Fetch the data from a CDN instead of hosting it: `"jsdelivr"` serves the
-   * repository's committed data at this version's release tag, from
-   * https://cdn.jsdelivr.net/gh/Spelling-Creator/spellophone@v<version>/...
+   * data from this version of the npm package, from
+   * https://cdn.jsdelivr.net/npm/@spelling-creator/spellophone@<version>/...
    */
   cdn?: "jsdelivr";
   /**

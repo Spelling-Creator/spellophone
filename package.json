@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "fetch:espeak": "node scripts/fetch-espeak.ts",
-    "build": "pnpm --filter @spelling-creator/spellophone build",
+    "build": "pnpm fetch:espeak && pnpm --filter @spelling-creator/spellophone build",
     "build:docs": "pnpm --filter @spellophone/docs build",
     "dev:docs": "pnpm --filter @spellophone/docs dev",
     "example:node": "pnpm --filter @spellophone/example-node start",

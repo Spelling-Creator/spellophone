@@ -37,14 +37,12 @@ installed:
 
 ```ts
 const espeak = await createEspeak({ cdn: "jsdelivr" });
-// fetches https://cdn.jsdelivr.net/gh/Spelling-Creator/spellophone@v<version>/packages/spellophone/espeak-ng-data/...
+// fetches https://cdn.jsdelivr.net/npm/@spelling-creator/spellophone@<version>/espeak-ng-data/...
 ```
 
-This uses jsDelivr's GitHub endpoint: the data files are committed to the
-repository, and jsDelivr serves them straight from git at the release tag. No
-npm registry is involved, which matters because the package is published to
-GitHub Packages, which jsDelivr does not mirror. It works for released versions
-(tags), not for a local build. `jsdelivrDataUrl(version)` returns the URL if
+This uses jsDelivr's npm endpoint, which serves the `espeak-ng-data`
+directory of the package as published to npmjs.com. It works for published
+versions, not for a local build. `jsdelivrDataUrl(version)` returns the URL if
 you want to construct it yourself, and `dataUrl` accepts any other host.
 
 ## Pick the languages
