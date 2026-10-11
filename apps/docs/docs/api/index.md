@@ -72,8 +72,11 @@ interface Voice {
 
 ### `setVoice(selector): void`
 
-Selects a voice by name or language tag (`"en-us"`, `"de"`, `"en-us+f3"`) or by
-properties:
+Selects a voice by name or language tag (`"en-us"`, `"en-gb"`, `"de"`,
+`"en-us+f3"`) or by properties. A string is matched against voice names first
+and then against the language tags voices list, exactly but ignoring case.
+A `+variant` suffix works with either. Properties are a
+`VoiceSelector`, whose `language` picks the closest voice instead:
 
 ```ts
 interface VoiceSelector {

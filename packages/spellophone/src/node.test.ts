@@ -66,6 +66,33 @@ describe("createEspeak (node)", () => {
     ).toBe(true);
   });
 
+  it("selects voices by a language tag with no voice file of that name", () => {
+    // British English is the file gmw/en, so "en-gb" only matches as a language.
+    espeak.setVoice("en-gb");
+    expect(
+      espeak.voice?.languages.some((l) => l.name.startsWith("en-gb")),
+    ).toBe(true);
+    expect(espeak.phonemes("tomato", { voice: "en-gb" })).toBe(
+      espeak.phonemes("tomato", { voice: "en" }),
+    );
+    espeak.setVoice("en-gb+f3");
+    expect(espeak.voice?.name).toBe("English (Great Britain)");
+    // The variant applies too. Synthesis jitters, so compare lengths loosely:
+    // f3 speaks noticeably slower than the plain voice.
+    const text = "Hello there, how are you today, my friend.";
+    const length = (voice: string) =>
+      espeak.synthesize(text, { voice }).samples.length;
+    const variant = length("en-gb+f3");
+    expect(Math.abs(variant - length("en+f3"))).toBeLessThan(
+      Math.abs(variant - length("en")),
+    );
+    // Matched ignoring case, like voice names: listVoices has it mixed case.
+    espeak.setVoice("chr-US-Qaaa-x-west");
+    expect(
+      espeak.voice?.languages.some((l) => l.name === "chr-US-Qaaa-x-west"),
+    ).toBe(true);
+  });
+
   it("applies per-call parameter overrides without keeping them", () => {
     espeak.setVoice("en-us");
     const before = espeak.getParameter("rate");
@@ -77,7 +104,9 @@ describe("createEspeak (node)", () => {
 
   it("rejects unknown voices", () => {
     // Not "klingon": espeak-ng really does ship one (piqd).
+    espeak.setVoice("en-us");
     expect(() => espeak.setVoice("no-such-voice")).toThrow(/No voice matches/);
+    expect(espeak.voice?.name).toBe("English (America)");
   });
 
   it("reports SSML marks", () => {

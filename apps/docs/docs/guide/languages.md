@@ -26,8 +26,12 @@ espeak.setVoice({ language: "en", gender: "female" });
 espeak.setVoice({ name: "English (Received Pronunciation)" });
 ```
 
-espeak-ng matches the closest voice it has, so `en-us-x-anything` still finds
-`en-us`. An unknown name throws `EspeakError`.
+A string is tried as a voice name first and then as a language tag, which has
+to be one a voice lists (see `listVoices`), though case doesn't matter. When
+several voices list it, the one that gives it the best priority wins. Anything
+else throws `EspeakError`, so a typo fails instead of landing on some other
+voice. The `language` property is looser: espeak-ng picks the closest voice it
+has, so `{ language: "en-us-x-anything" }` still finds `en-us`.
 
 ### Variants
 

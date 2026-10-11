@@ -301,6 +301,8 @@ export class Espeak {
   readonly dataPath: string;
   readonly #loader: DataLoader | undefined;
   #disposed = false;
+  /** Lowercased language tag to voice identifier, see `#voiceForLanguage`. */
+  #languageVoices: Map<string, string> | undefined;
 
   private constructor(
     module: EspeakModule,
@@ -513,9 +515,26 @@ export class Espeak {
 
   #selectVoice(selector: string | VoiceSelector): void {
     const m = this.module;
+    const byName = (name: string): number =>
+      withCString(m, name, (ptr) => m._sp_set_voice_by_name(ptr));
     let status: number;
     if (typeof selector === "string") {
-      status = withCString(m, selector, (ptr) => m._sp_set_voice_by_name(ptr));
+      status = byName(selector);
+      // espeak_SetVoiceByName only matches voice file names and voice names,
+      // so a language such as "en-gb" (in the file gmw/en) finds nothing.
+      // Retry with the voice that lists that exact language, keeping any
+      // +variant. Not with espeak_SetVoiceByProperties, as the espeak-ng
+      // command line does: it drops the variant, and it settles for the
+      // closest voice, so a typo would pick some voice instead of throwing
+      // ("no-such-voice" finds Norwegian).
+      if (status !== 0) {
+        const plus = selector.indexOf("+");
+        const tag = plus < 0 ? selector : selector.slice(0, plus);
+        const identifier = this.#voiceForLanguage(tag);
+        if (identifier !== undefined) {
+          status = byName(identifier + selector.slice(tag.length));
+        }
+      }
     } else {
       const gender =
         selector.gender === "male" ? 1 : selector.gender === "female" ? 2 : 0;
@@ -541,6 +560,30 @@ export class Espeak {
         status,
       );
     }
+  }
+
+  /**
+   * The identifier of the voice that lists this language tag (ignoring case)
+   * with the best priority, which is the one espeak-ng picks for it. Built
+   * once, since listing the voices reads every voice file.
+   */
+  #voiceForLanguage(tag: string): string | undefined {
+    if (!this.#languageVoices) {
+      const best = new Map<string, { identifier: string; priority: number }>();
+      for (const voice of this.listVoices()) {
+        for (const { name, priority } of voice.languages) {
+          const key = name.toLowerCase();
+          const current = best.get(key);
+          if (!current || priority < current.priority) {
+            best.set(key, { identifier: voice.identifier, priority });
+          }
+        }
+      }
+      this.#languageVoices = new Map(
+        [...best].map(([key, { identifier }]) => [key, identifier]),
+      );
+    }
+    return this.#languageVoices.get(tag.toLowerCase());
   }
 
   #applyOverrides(overrides: ParameterOverrides): () => void {
