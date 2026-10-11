@@ -6,6 +6,8 @@ the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-11
+
 ### Fixed
 
 - `setVoice` (and the `voice` option of `synthesize` and `phonemes`) now
@@ -92,6 +94,7 @@ First release. espeak-ng 1.52.0.
 - Low-level `Espeak.create`, `DataLoader`, `DataSource`, `httpDataSource`
   and `fileDataSource` for custom module and data loading.
 
-[Unreleased]: https://github.com/Spelling-Creator/spellophone/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/Spelling-Creator/spellophone/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/Spelling-Creator/spellophone/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Spelling-Creator/spellophone/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Spelling-Creator/spellophone/releases/tag/v0.1.0

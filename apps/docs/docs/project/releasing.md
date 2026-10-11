@@ -81,13 +81,15 @@ What does not:
 Publishing happens when a GitHub release is published. The workflow in
 `.github/workflows/release.yml` does the rest.
 
-1. Update `CHANGELOG.md`: move the `Unreleased` entries under the new version
-   with today's date.
-2. Bump the version in `packages/spellophone/package.json`:
+1. Bump the version in `packages/spellophone/package.json`. Do this first,
+   since `pnpm version` refuses to run with uncommitted changes:
 
    ```bash
    pnpm --filter @spelling-creator/spellophone exec pnpm version minor --no-git-tag-version
    ```
+
+2. Update `CHANGELOG.md`: move the `Unreleased` entries under the new version
+   with today's date.
 
 3. Commit and push to `main`.
 
