@@ -146,6 +146,45 @@ describe("httpDataSource", () => {
     await expect(source.read("missing.gz")).rejects.toThrow(/404/);
   });
 
+  it("accepts files the browser has already unzipped", async () => {
+    // What a page sees when the server sends the .gz files with
+    // Content-Encoding: gzip: fetch hands over the decoded body.
+    const { httpDataSource, DATA_DIR } = await import("./node.ts");
+    const { readFile } = await import("node:fs/promises");
+    const { join } = await import("node:path");
+    const { gunzipSync } = await import("node:zlib");
+    const fakeFetch: typeof fetch = async (input) => {
+      const file = new URL(String(input)).pathname.slice(1);
+      const bytes = await readFile(join(DATA_DIR, file));
+      return new Response(file.endsWith(".gz") ? gunzipSync(bytes) : bytes);
+    };
+
+    const source = await httpDataSource("https://example.test/", fakeFetch);
+    const core = await source.read(source.manifest.core.file);
+    expect(core.length).toBe(source.manifest.core.size);
+    const dict = await source.read("en_dict.gz");
+    expect(dict).toEqual(
+      new Uint8Array(gunzipSync(await readFile(join(DATA_DIR, "en_dict.gz")))),
+    );
+  });
+
+  it("names the file that fails to decode", async () => {
+    const { httpDataSource, DATA_DIR } = await import("./node.ts");
+    const { readFile } = await import("node:fs/promises");
+    const { join } = await import("node:path");
+    const fakeFetch: typeof fetch = async (input) => {
+      const file = new URL(String(input)).pathname.slice(1);
+      const bytes = await readFile(join(DATA_DIR, file));
+      // Keep the gzip header, cut off the rest.
+      return new Response(file.endsWith(".gz") ? bytes.subarray(0, 20) : bytes);
+    };
+
+    const source = await httpDataSource("https://example.test/", fakeFetch);
+    await expect(source.read("en_dict.gz")).rejects.toThrow(
+      /Failed to decode espeak-ng data file en_dict\.gz/,
+    );
+  });
+
   it("rejects relative URLs outside a browser", async () => {
     const { httpDataSource } = await import("./node.ts");
     await expect(httpDataSource("/espeak-ng-data/")).rejects.toThrow(

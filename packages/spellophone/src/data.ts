@@ -165,10 +165,16 @@ export async function decode(
   return new Uint8Array(await new Response(stream).arrayBuffer());
 }
 
+function isGzip(bytes: Uint8Array): boolean {
+  return bytes[0] === 0x1f && bytes[1] === 0x8b;
+}
+
 /**
  * A `DataSource` that fetches the files over HTTP from `baseUrl`, the
  * directory that holds `manifest.json`. A trailing slash is optional.
  * `decodeImpl` replaces `decode`, for engines without `DecompressionStream`.
+ * Files the browser has already unzipped (served with
+ * `Content-Encoding: gzip`) are passed on as they are.
  */
 export async function httpDataSource(
   baseUrl: string | URL,
@@ -212,7 +218,24 @@ export async function httpDataSource(
   }
   return {
     manifest,
-    read: async (file) => decodeImpl(await fetchBytes(file), manifest.encoding),
+    read: async (file) => {
+      const bytes = await fetchBytes(file);
+      // A server that sends the .gz files with Content-Encoding: gzip has the
+      // browser unzip them in transit, and fetch does not say so. A body
+      // without the gzip magic bytes is already decoded.
+      const encoding =
+        manifest.encoding === "gzip" && !isGzip(bytes)
+          ? "identity"
+          : manifest.encoding;
+      try {
+        return await decodeImpl(bytes, encoding);
+      } catch (error) {
+        throw new Error(
+          `Failed to decode espeak-ng data file ${file} from ${base}: ${String(error)}`,
+          { cause: error },
+        );
+      }
+    },
   };
 }
 
