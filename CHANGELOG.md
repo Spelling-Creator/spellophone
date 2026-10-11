@@ -13,6 +13,12 @@ the project follows [Semantic Versioning](https://semver.org/).
   `"en-gb"` or `"en-gb+f3"`. A string that matches no voice name is retried
   as a language when a voice lists exactly that language tag (ignoring case),
   and throws otherwise.
+- Loading data over HTTP no longer fails when the server sends the `.gz`
+  files with `Content-Encoding: gzip`, as Vite's dev server does for files
+  imported with `?url`. The browser has already unzipped those, so
+  `httpDataSource` now passes on a file that does not start with the gzip
+  magic bytes as it is.
+- A data file that fails to decode now names the file in the error.
 
 ## [0.2.0] - 2026-10-10
 
