@@ -33,8 +33,15 @@ no npm token stored anywhere, and every version gets a
 [provenance attestation](https://docs.npmjs.com/generating-provenance-statements)
 linking it to the commit and workflow run that built it.
 
+npm only accepts a trusted publisher for a package that already exists, so the
+first version on npmjs.com, 0.2.0, was published by hand. It was built locally
+from the release tag, and its tarball is byte for byte the one the workflow
+built (the build is reproducible), but it has no provenance attestation.
+Every version after it comes from the workflow.
+
 The trusted publisher is set on npmjs.com, in the package's settings under
-"Trusted publishing":
+"Trusted publishing", or with
+`npm trust github @spelling-creator/spellophone --file release.yml --repository Spelling-Creator/spellophone --allow-publish`:
 
 | Field             | Value              |
 | ----------------- | ------------------ |

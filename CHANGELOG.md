@@ -29,9 +29,10 @@ espeak-ng 1.52.0, unchanged.
 
 ### Changed
 
-- The package is now published to npmjs.com, with provenance, instead of
-  GitHub Packages, so installing it no longer needs a GitHub token or an
-  `.npmrc` entry. The tarball is still attached to each GitHub release.
+- The package is now published to npmjs.com instead of GitHub Packages, so
+  installing it no longer needs a GitHub token or an `.npmrc` entry. The
+  tarball is still attached to each GitHub release. Versions after this one
+  also carry a provenance attestation.
 - `cdn: "jsdelivr"` and `jsdelivrDataUrl` now use jsDelivr's npm endpoint
   (`cdn.jsdelivr.net/npm/@spelling-creator/spellophone@<version>/`) instead
   of its GitHub endpoint.
