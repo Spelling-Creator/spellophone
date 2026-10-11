@@ -6,6 +6,15 @@ the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Loading data over HTTP no longer fails when the server sends the `.gz`
+  files with `Content-Encoding: gzip`, as Vite's dev server does for files
+  imported with `?url`. The browser has already unzipped those, so
+  `httpDataSource` now passes on a file that does not start with the gzip
+  magic bytes as it is.
+- A data file that fails to decode now names the file in the error.
+
 ## [0.2.0] - 2026-10-10
 
 espeak-ng 1.52.0, unchanged.

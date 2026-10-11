@@ -61,10 +61,13 @@ Two implementations ship with the package:
 
 - `httpDataSource(baseUrl, fetch?, decode?)` fetches from a URL (browsers).
   `decode` replaces the decompression step, for engines without
-  `DecompressionStream`.
+  `DecompressionStream`. A `.gz` file that arrives without the gzip magic
+  bytes, because the server sent it with `Content-Encoding: gzip` and the
+  browser already unzipped it, skips that step.
 - `fileDataSource(dir?)` reads from a directory (`@spelling-creator/spellophone/node` only).
 
-`decode(bytes, encoding)` is the decompression helper they share.
+`decode(bytes, encoding)` is the decompression helper `httpDataSource` uses by
+default.
 
 ## `DataLoader`
 

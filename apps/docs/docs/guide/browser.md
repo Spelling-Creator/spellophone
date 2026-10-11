@@ -14,7 +14,10 @@ data comes from: it has to be fetched over HTTP, and you choose from where.
 espeak-ng needs about 725 KB of core data (voices, phoneme tables) plus one
 dictionary per language, from a few KB up to 4.8 MB for Russian. Everything is
 gzipped and decompressed in the browser with `DecompressionStream`, so it does
-not matter whether your server compresses transfers.
+not matter whether your server compresses transfers. A server that sends the
+`.gz` files with `Content-Encoding: gzip` (Vite's dev server does, for
+example) works too: the browser unzips them on the way in, and the library
+notices and skips its own decompression.
 
 ### Self-host it
 
