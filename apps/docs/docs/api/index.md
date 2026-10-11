@@ -74,8 +74,8 @@ interface Voice {
 
 Selects a voice by name or language tag (`"en-us"`, `"en-gb"`, `"de"`,
 `"en-us+f3"`) or by properties. A string is matched against voice names first
-and then used as a language, as `espeak-ng -v` does. Properties are a
-`VoiceSelector`:
+and then against the language tags voices list, exactly. Properties are a
+`VoiceSelector`, whose `language` picks the closest voice instead:
 
 ```ts
 interface VoiceSelector {

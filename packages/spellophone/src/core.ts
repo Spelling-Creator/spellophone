@@ -533,8 +533,13 @@ export class Espeak {
       status = withCString(m, selector, (ptr) => m._sp_set_voice_by_name(ptr));
       // espeak_SetVoiceByName only matches voice file names and voice names,
       // so a language such as "en-gb" (in the file gmw/en) finds nothing.
-      // Retry it as a language, as the espeak-ng command line does.
-      if (status !== 0) status = byProperties({ language: selector });
+      // Retry it as a language, as the espeak-ng command line does, but only
+      // when a voice lists that exact language. espeak-ng settles for the
+      // closest voice otherwise, so a typo would pick some voice instead of
+      // throwing ("no-such-voice" finds Norwegian).
+      if (status !== 0 && this.#hasLanguage(selector)) {
+        status = byProperties({ language: selector });
+      }
     } else {
       status = byProperties(selector);
     }
@@ -548,6 +553,14 @@ export class Espeak {
         status,
       );
     }
+  }
+
+  /** Whether a voice lists this language tag. A `+variant` suffix is ignored. */
+  #hasLanguage(tag: string): boolean {
+    const language = tag.split("+")[0]!.toLowerCase();
+    return this.listVoices().some((voice) =>
+      voice.languages.some((l) => l.name === language),
+    );
   }
 
   #applyOverrides(overrides: ParameterOverrides): () => void {
