@@ -30,3 +30,6 @@ logs/
 # Playwright MCP/CLI screenshots and snapshots (browser verification artifacts)
 .playwright-mcp/
 .playwright-cli/
+
+# Tarballs from pnpm pack (the release workflow packs one per release)
+packages/spellophone/*.tgz
