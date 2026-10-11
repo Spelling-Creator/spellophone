@@ -6,6 +6,10 @@ the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-10
+
+espeak-ng 1.52.0, unchanged.
+
 ### Added
 
 - `@spelling-creator/spellophone/wasm2js`: espeak-ng compiled to plain
@@ -25,9 +29,28 @@ the project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- The package is now published to npmjs.com, with provenance, instead of
+  GitHub Packages, so installing it no longer needs a GitHub token or an
+  `.npmrc` entry. The tarball is still attached to each GitHub release.
+- `cdn: "jsdelivr"` and `jsdelivrDataUrl` now use jsDelivr's npm endpoint
+  (`cdn.jsdelivr.net/npm/@spelling-creator/spellophone@<version>/`) instead
+  of its GitHub endpoint.
 - `EspeakModule` (and what `DataLoader` and `Espeak.create` accept) no longer
   includes `NODEFS`, which the wasm2js module does not have. `MainModule` from
   `@spelling-creator/spellophone/wasm/espeak-ng.js` is still the full type.
+- The docs site uses the Spelling Creator favicon, and its header links to
+  the package on npmjs.com.
+
+### Development
+
+- The compiled wasm and data are no longer committed, and were removed from
+  the repository's history. `pnpm build` compiles them from espeak-ng's
+  sources, and CI builds them on Linux and macOS and fails if the two builds
+  differ in any byte.
+- The release workflow publishes with npm's trusted publishing (OIDC), so the
+  repository holds no npm token.
+- The tsdown config uses `deps.neverBundle` in place of `external`, which
+  tsdown 0.23 deprecates. The output is the same.
 
 ## [0.1.0] - 2026-10-09
 
@@ -54,5 +77,6 @@ First release. espeak-ng 1.52.0.
 - Low-level `Espeak.create`, `DataLoader`, `DataSource`, `httpDataSource`
   and `fileDataSource` for custom module and data loading.
 
-[Unreleased]: https://github.com/Spelling-Creator/spellophone/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/Spelling-Creator/spellophone/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/Spelling-Creator/spellophone/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Spelling-Creator/spellophone/releases/tag/v0.1.0

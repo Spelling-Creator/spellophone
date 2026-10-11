@@ -1,6 +1,6 @@
 {
   "name": "@spelling-creator/spellophone",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "espeak-ng text-to-speech and phoneme transcription for Node.js and browsers, compiled to WebAssembly.",
   "keywords": [
     "espeak",
