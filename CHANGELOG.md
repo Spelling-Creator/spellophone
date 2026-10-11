@@ -10,8 +10,9 @@ the project follows [Semantic Versioning](https://semver.org/).
 
 - `setVoice` (and the `voice` option of `synthesize` and `phonemes`) now
   accepts a language tag that has no voice file of the same name, such as
-  `"en-gb"`. A string that matches no voice name is retried as a language
-  when a voice lists exactly that language tag, and throws otherwise.
+  `"en-gb"` or `"en-gb+f3"`. A string that matches no voice name is retried
+  as a language when a voice lists exactly that language tag (ignoring case),
+  and throws otherwise.
 
 ## [0.2.0] - 2026-10-10
 

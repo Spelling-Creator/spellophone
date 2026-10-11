@@ -77,6 +77,20 @@ describe("createEspeak (node)", () => {
     );
     espeak.setVoice("en-gb+f3");
     expect(espeak.voice?.name).toBe("English (Great Britain)");
+    // The variant applies too. Synthesis jitters, so compare lengths loosely:
+    // f3 speaks noticeably slower than the plain voice.
+    const text = "Hello there, how are you today, my friend.";
+    const length = (voice: string) =>
+      espeak.synthesize(text, { voice }).samples.length;
+    const variant = length("en-gb+f3");
+    expect(Math.abs(variant - length("en+f3"))).toBeLessThan(
+      Math.abs(variant - length("en")),
+    );
+    // Matched ignoring case, like voice names: listVoices has it mixed case.
+    espeak.setVoice("chr-US-Qaaa-x-west");
+    expect(
+      espeak.voice?.languages.some((l) => l.name === "chr-US-Qaaa-x-west"),
+    ).toBe(true);
   });
 
   it("applies per-call parameter overrides without keeping them", () => {
