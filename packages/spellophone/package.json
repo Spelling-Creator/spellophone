@@ -93,9 +93,9 @@
     "core-js": "^3.50.0",
     "fflate": "^0.8.3",
     "publint": "^0.3.17",
-    "tsdown": "^0.23.0",
+    "tsdown": "^0.23.1",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.5"
   },
   "engines": {
     "node": ">=24"
