@@ -87,7 +87,7 @@
     "prepack": "pnpm build:ts"
   },
   "devDependencies": {
-    "@swc/core": "^1.16.18",
+    "@swc/core": "^1.16.20",
     "@types/node": "^26.6.5",
     "acorn": "^8.19.0",
     "core-js": "^3.50.0",
