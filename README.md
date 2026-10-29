@@ -63,4 +63,4 @@ minute, and also needs a host C compiler. See
 
 ## License
 
-[GPL-3.0-or-later](LICENSE), like espeak-ng.
+[GPL-3.0-or-later](https://github.com/Spelling-Creator/spellophone/blob/main/LICENSE), like espeak-ng.

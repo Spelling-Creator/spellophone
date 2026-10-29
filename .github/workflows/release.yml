@@ -47,6 +47,11 @@ jobs:
       - name: Test
         run: pnpm test
 
+      # npm only ships a README from the package directory. pnpm already
+      # copies LICENSE from the workspace root, but not the README.
+      - name: Copy the README into the package
+        run: cp README.md packages/spellophone/
+
       - name: Pack
         working-directory: packages/spellophone
         run: pnpm pack --out spellophone-${GITHUB_REF_NAME}.tgz

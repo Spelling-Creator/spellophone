@@ -6,6 +6,10 @@ the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- The published package now includes the README.
+
 ## [0.2.1] - 2026-10-11
 
 ### Fixed
