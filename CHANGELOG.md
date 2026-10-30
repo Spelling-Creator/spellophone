@@ -6,6 +6,11 @@ the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- The docs site uses the new Spelling Creator icon, as its favicon and in
+  its header.
+
 ### Fixed
 
 - The published package now includes the README.

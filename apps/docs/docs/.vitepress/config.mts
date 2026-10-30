@@ -27,8 +27,10 @@ export default defineConfig({
   description:
     "espeak-ng text-to-speech and phoneme transcription for Node.js and browsers, compiled to WebAssembly.",
 
-  // The same favicon as spellingcreator.org (copied from the Spelling Creator
-  // repository into docs/public).
+  // The same icons as spellingcreator.org, copied into docs/public from the
+  // Spelling Creator repository, where apps/web/scripts/icons.mjs writes them:
+  // favicon.svg from apps/web/src, favicon.ico from apps/docs/docs/public/img,
+  // apple-touch-icon.png from apps/web/public/icons.
   head: [
     ["link", { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" }],
     ["link", { rel: "icon", href: "/favicon.ico", sizes: "any" }],
@@ -45,6 +47,10 @@ export default defineConfig({
   },
 
   themeConfig: {
+    // The logo's letters are cut-outs that show the page, so the board is
+    // charcoal on the light theme and light on the dark one. Both are copied
+    // from apps/docs/docs/public/img in the Spelling Creator repository.
+    logo: { light: "/img/logo.svg", dark: "/img/logo-dark.svg" },
     siteTitle: "Spellophone",
     search: { provider: "local" },
     socialLinks: [
