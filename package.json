@@ -18,9 +18,9 @@
     "fmt": "oxfmt ."
   },
   "devDependencies": {
-    "@types/node": "^26.6.5",
-    "oxfmt": "^0.73.0",
-    "oxlint": "^1.88.0",
+    "@types/node": "^26.6.6",
+    "oxfmt": "^0.75.0",
+    "oxlint": "^1.90.0",
     "typescript": "^7.0.2"
   },
   "engines": {
